@@ -21,8 +21,6 @@ analyze conn =
   loadAnalyses
     >>= runAnalyses conn
 
--- loading all the EXPLAINs to run from the tests directory
-
 loadAnalyses :: IO [ExplainPlan]
 loadAnalyses =
   listConfigs
@@ -36,11 +34,9 @@ loadAnalyses =
       fromConfig filePath
         <$> Yaml.decodeFileThrow ("./tests/" <> filePath)
 
-fromConfig :: FilePath -> Explain.Config -> ExplainPlan
-fromConfig filePath (Explain.Config s q) =
-  ExplainPlan s q filePath
-
--- running all the EXPLAINs and persisting outputs to the explained directory
+    fromConfig :: FilePath -> Explain.Config -> ExplainPlan
+    fromConfig filePath (Explain.Config s q) =
+      ExplainPlan s q filePath
 
 runAnalyses :: Db.Connection -> [ExplainPlan] -> IO ()
 runAnalyses conn = mapM_ (runAnalysis conn)
@@ -48,17 +44,17 @@ runAnalyses conn = mapM_ (runAnalysis conn)
 runAnalysis :: Db.Connection -> ExplainPlan -> IO ()
 runAnalysis conn toRun =
   resetDatabase conn
-    >> runTest conn toRun
+    >> runExplain conn toRun
     >>= writeFile ("./explained/" <> name toRun)
 
 resetDatabase :: Db.Connection -> IO ()
 resetDatabase conn =
   readFile "./dump.sql" >>= Db.runRaw conn
 
-runTest :: Db.Connection -> ExplainPlan -> IO String
-runTest conn (ExplainPlan s q _) = do
+runExplain :: Db.Connection -> ExplainPlan -> IO String
+runExplain conn (ExplainPlan s q _) =
   prepare
-  explainQuery
+    >> explainQuery
   where
     prepare = traverse_ (Db.runRaw conn) s
     explainQuery = Db.fromSql . firstColumn . firstRow <$> Db.quickQuery conn (explained q) []

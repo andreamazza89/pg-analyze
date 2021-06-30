@@ -12,7 +12,6 @@ main = do
   Explain.analyze conn
   putStrLn "all done"
 
--- paths are relative, so expecting a ./tests/ directory with the queries, and and ./explained/ for output + dump should be named dump.sql
 -- gotta create a dump with `pg_dump --inserts -c <db_name> > dump.sql`
 -- gotta create the test db `psql -c 'create database test_db'` and run the dump once `psql test_db < dump.sql`
 -- tables and indexes in queries must be fully qualified (i.e. select * from public.employees)

@@ -24,8 +24,10 @@ source-repository head
 
 library
   exposed-modules:
+      Env
       Explain
       Explain.Config
+      Initialise
       Lib
   other-modules:
       Paths_pg_analyze
