@@ -8,7 +8,6 @@ copyright:           "2021 Author name here"
 
 extra-source-files:
 - README.md
-- ChangeLog.md
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -21,7 +20,6 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
-- postgresql-simple >= 0.5 && < 0.7
 - text >=1.2 && <1.3
 - aeson >= 1.5.6.0
 - directory >= 1.3 && < 1.4
@@ -29,6 +27,8 @@ dependencies:
 - HDBC >= 2.3 && < 2.5
 - HDBC-postgresql >= 2.3 && < 2.5
 - process >= 1.6.12.0
+- vector >= 0.11 && < 0.13
+- colonnade >= 1.1 && < 1.3
 
 library:
   source-dirs: src

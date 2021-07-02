@@ -14,5 +14,5 @@ instance FromJSON Config where
   parseJSON (JSON.Object o) =
     Config
       <$> o .:? "setup"
-      <*> o .:  "query"
+      <*> o .: "query"
   parseJSON _ = fail "config must be an object"

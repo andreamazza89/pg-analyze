@@ -1,10 +1,10 @@
 module Initialise (initialise) where
-  
+
+import Data.Function ((&))
 import qualified Data.List as List
 import qualified Env
 import qualified System.Process as Proc
-import Data.Function ((&))
-  
+
 initialise :: IO ()
 initialise = do
   putStrLn "initialising the testing environment"

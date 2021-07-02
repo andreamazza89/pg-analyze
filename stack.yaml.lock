@@ -25,6 +25,20 @@ packages:
       sha256: d457ca128288ac2adfa3ffcf9af0bd3910df0db7f16325ad7251d36e5d1ffc78
   original:
     hackage: process-1.6.12.0
+- completed:
+    hackage: colonnade-1.2.0.2@sha256:c95c2ecff5cfa28c736d8fa662d28b71129f67457068e3f4467b296a621607ab,2099
+    pantry-tree:
+      size: 327
+      sha256: 98ccdd327916e0ff0ea2fa93ff9a96f5d492ae88258b330e991e6dcc4d332496
+  original:
+    hackage: colonnade-1.2.0.2
+- completed:
+    hackage: profunctors-5.4@sha256:f0cae8a572765e8fb6728c06f5482a1dc49cf36467a11f475f863000d2f6b486,2174
+    pantry-tree:
+      size: 1639
+      sha256: 89ac1eb8f3965a746dfdc6dfa90a6c1d326e4c33c2e9e73549b3dbda4592eb01
+  original:
+    hackage: profunctors-5.4
 snapshots:
 - completed:
     size: 585393
