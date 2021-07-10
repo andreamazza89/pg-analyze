@@ -28,7 +28,6 @@ library
       Explain.Config
       Explain.Plan
       Initialise
-      Lib
   other-modules:
       Paths_pg_analyze
   hs-source-dirs:
