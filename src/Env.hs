@@ -1,16 +1,24 @@
-module Env (Env (..), def) where
+module Env
+  ( def,
+    Env (..),
+  )
+where
+
+import qualified Database.HDBC.PostgreSQL as Db
 
 data Env = Env
-  { testsDirectory :: FilePath,
-    explainedDirectory :: FilePath,
+  { dbConnection :: Db.Connection,
+    testsDirectory :: FilePath,
     sqlDump :: FilePath,
+    explainedDirectory :: FilePath,
     testDb :: String
   }
 
-def :: Env
-def =
+def :: Db.Connection -> Env
+def conn =
   Env
+    conn
     "./tests/"
-    "./explained/"
     "./dump.sql"
+    "./explained/"
     "test_db"

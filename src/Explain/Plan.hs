@@ -1,9 +1,16 @@
-module Explain.Plan (load, setup, query, name, Plan) where
+module Explain.Plan
+  ( load,
+    Plan (..),
+  )
+where
 
+import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Trans.Reader (asks)
 import qualified Data.Yaml as Yaml
 import qualified Env
 import qualified Explain.Config as Explain
 import System.Directory as Directory
+import Types
 
 data Plan = Plan
   { setup :: Maybe DbQuery,
@@ -14,20 +21,21 @@ data Plan = Plan
 
 type DbQuery = String
 
-load :: IO [Plan]
+load :: App [Plan]
 load =
-  listConfigs >>= traverse parseConfig
+  asks Env.testsDirectory
+    >>= listConfigs
+    >>= traverse parseConfig
   where
-    listConfigs :: IO [FilePath]
-    listConfigs = Directory.listDirectory testsDirectory
+    listConfigs :: FilePath -> App [FilePath]
+    listConfigs = liftIO . Directory.listDirectory
 
-    parseConfig :: FilePath -> IO Plan
-    parseConfig filePath =
+    parseConfig :: FilePath -> App Plan
+    parseConfig filePath = do
+      testsDirectory <- asks Env.testsDirectory
       fromConfig filePath
         <$> Yaml.decodeFileThrow (testsDirectory <> filePath)
 
     fromConfig :: FilePath -> Explain.Config -> Plan
     fromConfig filePath (Explain.Config s q) =
       Plan s q filePath
-
-    testsDirectory = Env.testsDirectory Env.def

@@ -11,15 +11,18 @@ module Explain
 where
 
 import Colonnade
+import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Trans.Reader (asks)
 import Data.Aeson as JSON
 import Data.Foldable
 import Data.Vector ((!))
 import qualified Data.Yaml as Yaml
 import qualified Database.HDBC as Db
 import qualified Database.HDBC.PostgreSQL as Db
+import qualified Env
 import qualified Explain.Plan as Explain
 import qualified Explain.Plan as Plan
-import qualified Env
+import Types
 
 data Explain = Explain
   { totalCost :: Double,
@@ -28,21 +31,20 @@ data Explain = Explain
   }
   deriving (Show)
 
-analyze :: Db.Connection -> IO [Explain]
-analyze conn =
-  Plan.load >>= runAnalyses conn
+analyze :: App [Explain]
+analyze = do
+  Plan.load >>= traverse runAnalysis
 
-runAnalyses :: Db.Connection -> [Explain.Plan] -> IO [Explain]
-runAnalyses conn = traverse (runAnalysis conn)
+runAnalysis :: Explain.Plan -> App Explain
+runAnalysis plan = do
+  conn <- asks Env.dbConnection
+  sqlDump <- asks Env.sqlDump
+  liftIO $ resetDatabase conn sqlDump
+  liftIO $ runExplain conn plan
 
-runAnalysis :: Db.Connection -> Explain.Plan -> IO Explain
-runAnalysis conn toRun = do
-  resetDatabase conn
-  runExplain conn toRun
-
-resetDatabase :: Db.Connection -> IO ()
-resetDatabase conn =
-  readFile (Env.sqlDump Env.def) >>= Db.runRaw conn
+resetDatabase :: Db.Connection -> FilePath -> IO ()
+resetDatabase conn sqlDump = do
+  readFile sqlDump >>= Db.runRaw conn
 
 runExplain :: Db.Connection -> Explain.Plan -> IO Explain
 runExplain conn plan =
@@ -74,11 +76,11 @@ instance JSON.FromJSON ExplainIntermediate where
   parseJSON _ = fail "explain output must be an array"
 
 fromDb :: String -> [[Db.SqlValue]] -> IO Explain
-fromDb name' [[explainOutput]] =
-  toExplain' <$> Yaml.decodeThrow (Db.fromSql explainOutput)
+fromDb planName [[explainOutput]] =
+  fromDb' <$> Yaml.decodeThrow (Db.fromSql explainOutput)
   where
-    toExplain' :: ExplainIntermediate -> Explain
-    toExplain' intermediate = Explain (totalCostIntermediate intermediate) name' (rawIntermediate intermediate)
+    fromDb' :: ExplainIntermediate -> Explain
+    fromDb' intermediate = Explain (totalCostIntermediate intermediate) planName (rawIntermediate intermediate)
 fromDb _ _ =
   fail "explain output should be one column / one row"
 
