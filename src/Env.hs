@@ -1,5 +1,5 @@
 module Env
-  ( def,
+  ( build,
     Env (..),
   )
 where
@@ -14,8 +14,8 @@ data Env = Env
     testDb :: String
   }
 
-def :: Db.Connection -> Env
-def conn =
+build :: Db.Connection -> Env
+build conn =
   Env
     conn
     "./tests/"

@@ -18,13 +18,13 @@ data Command = Initialise | Analyze
 main :: IO ()
 main = do
   Options.execParser commandParser >>= runCommand
-  where
-    commandParser :: Options.ParserInfo Command
-    commandParser =
-      Options.info
-        (Options.helper <*> Options.subparser (initialise <> analyze))
-        mempty
 
+commandParser :: Options.ParserInfo Command
+commandParser =
+  Options.info
+    (Options.helper <*> Options.subparser (initialise <> analyze))
+    mempty
+  where
     initialise =
       Options.command
         "initialise"
@@ -48,7 +48,7 @@ runCommand Initialise = do
 
 buildEnvironment :: IO Env.Env
 buildEnvironment =
-  Env.def <$> Db.connectPostgreSQL ("postgresql://localhost/" <> "test_db")
+  Env.build <$> Db.connectPostgreSQL ("postgresql://localhost/" <> "test_db")
 
 saveExplained :: [Explain.Explain] -> Env.Env -> IO ()
 saveExplained explains =
