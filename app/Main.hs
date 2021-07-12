@@ -2,8 +2,6 @@
 
 module Main where
 
---import qualified Initialise
-
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Reader
 import Data.Foldable
@@ -11,16 +9,46 @@ import qualified Data.Yaml as Yaml
 import qualified Database.HDBC.PostgreSQL as Db
 import qualified Env
 import qualified Explain
+import qualified Initialise
+import qualified Options.Applicative as Options
+
+data Command = Initialise | Analyze
+  deriving (Show)
 
 main :: IO ()
 main = do
+  Options.execParser commandParser >>= runCommand
+  where
+    commandParser :: Options.ParserInfo Command
+    commandParser =
+      Options.info
+        (Options.helper <*> Options.subparser (initialise <> analyze))
+        mempty
+
+    initialise =
+      Options.command
+        "initialise"
+        (Options.info (pure Initialise) (Options.progDesc "Initialise a directory for pg-analyze"))
+
+    analyze =
+      Options.command
+        "analyze"
+        (Options.info (pure Analyze) (Options.progDesc "Run the analysis"))
+
+runCommand :: Command -> IO ()
+runCommand Analyze = do
   putStrLn "running explain tests..."
-  environment <- Env.def <$> Db.connectPostgreSQL ("postgresql://localhost/" <> "test_db")
+  environment <- buildEnvironment
   explains <- runReaderT Explain.analyze environment
   saveExplained explains environment
   putStr $ Explain.viewTable explains
-  
---  runReaderT Initialise.initialise environment
+runCommand Initialise = do
+  environment <- buildEnvironment
+  runReaderT Initialise.initialise environment
+
+buildEnvironment :: IO Env.Env
+buildEnvironment =
+  Env.def <$> Db.connectPostgreSQL ("postgresql://localhost/" <> "test_db")
 
 saveExplained :: [Explain.Explain] -> Env.Env -> IO ()
 saveExplained explains =
