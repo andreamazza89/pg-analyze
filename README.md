@@ -41,6 +41,37 @@ running explain tests...
 +-----------------+------------+
 ```
 
+## Installation
+
+### Note on security and trust
+The binary we distribute is not signed for MacOS. This has two implications:
+
+1. Apple have not verified/security-scanned this software.
+2. If you are happy to proceed and use this, you will need to add an exception for this program in the
+   'Security & Privacy' menu.
+   
+If you are not comfortable with this, an alternative is to clone this repository and build the binary yourself
+using [stack](https://github.com/commercialhaskell/stack)
+
+If you are happy with the above:
+
+- Download a release from [this page](https://github.com/andreamazza89/pg-analyze/releases)
+- Mark the downloaded binary as executable with `chmod +x <PATH YOU DOWNLOADED TO>/pg-analyze`
+- To run the program, either 
+  - move the binary into a directory within your path. You can now run with just `pg-analyze`
+  - use the full path to the binary `<PATH YOU DOWNLOADED TO>/pg-analyze`
+
+## How to use
+
+- Create a directory for your tests - e.g. `mkdir myPgTests && cd myPgTests`
+- Initialise the directory for pg-analyze - `pg-analyze initialise` (this creates a few files/folders within the current
+  directory, and a test_db database in your postgres server)
+- You can now run the example with `pg-analyze analyze`
+- Create a dump of your database with `pg_dump --inserts -c <NAME OF DB> > dump.sql`
+- Replace the sample dump.sql with the one you created and load it onto the test db `psql test_db < dump.sql`
+- Update (or remove) the sample query in `/tests/sampleTest` and create new ones as needed.
+- You can now run your tests with  `pg-analyze analyze`
+
 ## TODOs
 - [x] Make an init-db script
 - [x] As well as writing the EXPLAIN output to a file, print out a high-level overview of the tests using colonnade.
@@ -48,13 +79,12 @@ running explain tests...
 - [x] Use optparse-applicative to handle commands
 - [ ] Readme instructions
   - [x] Rationale
-  - [ ] Installation
-  - [ ] How to use
+  - [x] Installation
+  - [x] How to use
 - [ ] Configurable db details/connection
 - [x] Play with ReaderT (with IO?) to implicitly pass the database connection around as well as default values like `./tests`
 - [ ] Possibly introduce exception handling
 - [ ] Add functionality to automatically open the explain outputs onto a browser?
-- [ ] Add functionality to compare the output of different queries for equality?
 
 ## QUESTIONS
 - Is there a way to avoid parsing an Explain.Config and then converting it to an ExplainPlan? As in can one 'tap' into fromJSON and supply any
